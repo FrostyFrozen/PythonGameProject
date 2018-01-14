@@ -18,9 +18,9 @@ class Player(pg.sprite.Sprite):
             self.acc = vec(0, 0)
             keys = pg.key.get_pressed()
             if keys[pg.K_LEFT]:
-                self.acc.x =-5
+                self.acc.x = -0.5
             if keys[pg.K_RIGHT]:
-                self.acc.x =0.5
+                self.acc.x = 0.5
             self.vec += self.acc
             self.pop += self.vel + 0.5 * self.acc
             
