@@ -1,22 +1,27 @@
 # Sprite classes dla gry
 import pygame as pg 
 from opcje import *
- 
+vec = pg.math.Vector2
+
 class Player(pg.sprite.Sprite):
     def __init__(self):
         pg.sprite.Sprite.__init__(self)
         self.image = pg.Surface((30, 40))
         self.image.fill(YELLOW)
-        self.rect = self.image.get.rect()
-        self.vx = 0
-        self.vy = 0
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH / 2, HEIGHT / 2)
+        self.pos = vec(WIDTH / 2, HEIGHT / 2)
+        self.vel = vec(0, 0)
+        self.acc = vec(0, 0)
         
         def update(self):
-            self.vx = 0
+            self.acc = vec(0, 0)
             keys = pg.key.get_pressed()
-            if keys[pg.K_LEFT]:
-                self.vx = -5
-            if keys[pg.K_RIGHT]:
-                self.vx = 5
-            self.rect.x += self.vx
-            self.rect.y += self.vy
+            if keys[pg.K_A]:
+                self.acc.x =-5
+            if keys[pg.K_D]:
+                self.acc.x =0.5
+            self.vec += self.acc
+            self.pop += self.vel + 0.5 * self.acc
+            
+            self.rect.center = self.pos
