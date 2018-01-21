@@ -44,10 +44,10 @@ class Player(pg.sprite.Sprite):
         self.rect.midbottom = self.pos
 
 class Platform(pg.sprite.Sprite):
-    def __init__(self, x, y, w, h):
+    def __init__(self, x, y, w, h, color):
         pg.sprite.Sprite.__init__(self)
         self.image = pg.Surface((w, h))
-        self.image.fill(GREEN)
+        self.image.fill(color)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y

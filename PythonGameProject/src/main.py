@@ -1,9 +1,11 @@
-# Jumping Down - platform game
+# Jumping Heavens - platform game
 
 import pygame as pg
 import random
 from opcje import *
 from sprites import *
+from os import path
+import random as rnd
 
 class Game:
     def __init__(self):
@@ -15,9 +17,19 @@ class Game:
         self.clock = pg.time.Clock()
         self.running = True
         self.font_name = pg.font.match_font(FONT_NAME)
-        
+        self.load_data()
+    def load_data(self):
+        # high score #czytanie i pisanie, jesli nie istnieje to stworzy plik
+        self.dir = path.dirname(__file__)
+        with open(path.join(self.dir, HS_FILE), 'w') as f:
+             try:
+                 self.highscore = int(f.read())
+             except:
+                 self.highscore = 0
+             
     def new(self):
         # Nowa Gra
+        rnd.seed(1)
         self.score = 0
         self.all_sprites = pg.sprite.Group()
         self.platforms = pg.sprite.Group()
@@ -65,11 +77,25 @@ class Game:
            self.playing = False
            
         # Spawnowanie nowych platform       
-       while len(self.platforms) < 6:
+       while len(self.platforms) < 7:
             width = random.randrange(50, 100)
+            
+            col_randomizer=rnd.randint(0,2)
+            multiplier=1
+            if (col_randomizer==0):
+                col=YELLOW
+            elif (col_randomizer==1):
+                col=GREEN
+            else:
+                col=RED
+            if self.score > 100:
+                multiplier=0.8
+            if self.score > 150:
+                multiplier=0.5
+                
             p = Platform(random.randrange(0, WIDTH-width),
                          random.randrange(-75, -30),
-                         width, 20)
+                         multiplier*width, 20, col)        
             self.platforms.add(p)
             self.all_sprites.add(p)
                    
@@ -102,6 +128,7 @@ class Game:
                        WHITE, WIDTH /2, HEIGHT /2)
         self.draw_text("Wcisnij dowolny klawisz, aby zaczac gre", 22, WHITE,
                        WIDTH / 2, HEIGHT * 3 / 4)
+        self.draw_text("High Score:" + str(self.highscore), 22, WHITE, WIDTH /2, 15)
         pg.display.flip()
         self.wait_for_key()
         
@@ -115,6 +142,13 @@ class Game:
                        WHITE, WIDTH /2, HEIGHT /2)
         self.draw_text("Wcisnij dowolny klawisz, aby zaczac od nowa", 22, WHITE,
                        WIDTH / 2, HEIGHT * 3 / 4)
+        if self.score > self.highscore:
+            self.highscore = self.score
+            self.draw_text("NEW HIGH SCORE!", 22, WHITE, WIDTH / 2, HEIGHT / 2 + 40)
+            with open(path.join(self.dir, HS_FILE), 'w') as f:
+                f.write(str(self.score))
+        else:
+            self.draw_text("High Score:" + str(self.highscore), 22, WHITE, WIDTH /2, HEIGHT / 2 + 40)
         pg.display.flip()
         self.wait_for_key()
     
