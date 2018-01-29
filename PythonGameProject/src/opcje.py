@@ -6,11 +6,11 @@ FPS = 60
 FONT_NAME = 'arial'
 HS_FILE = "highscore.txt"
 
-# Player properties
+# Ustawienia gracza
 PLAYER_ACC = 0.5
 PLAYER_FRICTION = -0.12
 PLAYER_GRAV = 0.8
-PLAYER_JUMP = 20
+PLAYER_JUMP = 22
 
 # - definiowanie kolorów
 WHITE = (255, 255, 255)

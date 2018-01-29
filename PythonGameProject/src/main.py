@@ -77,7 +77,8 @@ class Game:
            self.playing = False
            
         # Spawnowanie nowych platform       
-       while len(self.platforms) < 7:
+       while len(self.platforms) < 6:
+           
             width = random.randrange(50, 100)
             
             col_randomizer=rnd.randint(0,2)
@@ -88,21 +89,21 @@ class Game:
                 col=GREEN
             else:
                 col=RED
-            if self.score > 100:
+            if self.score > 400:
+                multiplier=0.9
+            if self.score > 700:
                 multiplier=0.8
-            if self.score > 150:
-                multiplier=0.5
                 
             p = Platform(random.randrange(0, WIDTH-width),
                          random.randrange(-75, -30),
-                         multiplier*width, 20, col)        
+                         multiplier*width, 20,col)        
             self.platforms.add(p)
             self.all_sprites.add(p)
                    
     def events(self):
         # Game Loop - Events
        for event in pg.event.get():
-           #check for closing window
+           #sprawdza czy zamknieto okno
            if event.type == pg.QUIT:             
                if self.playing:
                    self.playing = False
@@ -133,7 +134,7 @@ class Game:
         self.wait_for_key()
         
     def show_go_screen(self):
-        #game over/ continue
+        #game over/ kontynuacja
         if not self.running:
             return
         self.screen.fill(BGCOLOR)
