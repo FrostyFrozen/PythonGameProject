@@ -11,7 +11,7 @@ PLAYER_ACC = 0.5
 PLAYER_FRICTION = -0.12
 PLAYER_GRAV = 0.8
 PLAYER_JUMP = 22
-
+PLAYER_BOXES=(50,70)
 # - definiowanie kolorów
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -28,4 +28,5 @@ PLATFORM_LIST = [(0, HEIGHT - 40, WIDTH, 40, RED),
                   (125, HEIGHT - 350, 100, 20, RED),
                   (350,200,100,20, RED),
                   (120,100,100,20, RED)]
+#PLAYER_SKIN="Idle__000.png"
 

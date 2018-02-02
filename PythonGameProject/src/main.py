@@ -21,6 +21,25 @@ class Game:
     def load_data(self):
         # high score #czytanie i pisanie, jesli nie istnieje to stworzy plik
         self.dir = path.dirname(__file__)
+        self.img_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/images/postac"
+        ## --------------
+        # jeden obrazek dla gracza
+        self.player_img_idle=[]
+        self.player_img_jump=[]
+        self.player_img_run=[]
+        for i in range(10):
+            img_idle=pg.image.load(path.join(self.img_dir,"Idle__00"+str(i)+".png")).convert_alpha()
+            img_idle=pg.transform.scale(img_idle,PLAYER_BOXES)
+            self.player_img_idle.append(img_idle)
+            
+            img_jump=pg.image.load(path.join(self.img_dir,"Jump__00"+str(i)+".png")).convert_alpha()
+            img_jump=pg.transform.scale(img_jump,PLAYER_BOXES)
+            self.player_img_jump.append(img_jump)
+            
+            img_run=pg.image.load(path.join(self.img_dir,"Run__00"+str(i)+".png")).convert_alpha()
+            img_run=pg.transform.scale(img_run,PLAYER_BOXES)
+            self.player_img_run.append(img_run)
+        ## --------------
         with open(path.join(self.dir, HS_FILE), 'w') as f:
              try:
                  self.highscore = int(f.read())
