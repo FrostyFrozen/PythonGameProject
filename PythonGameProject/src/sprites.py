@@ -93,6 +93,8 @@ class Player(pg.sprite.Sprite):
                 bottom = self.rect.bottom
                 if self.vel.y < 0:
                     self.image = self.game.player_img_jump[self.current_frame]
+                if self.vel.x < 0:
+                    self.image = self.game.player_img_jumpl[self.current_frame]
                 self.rect = self.image.get_rect()
                 self.rect.bottom = bottom
                 
