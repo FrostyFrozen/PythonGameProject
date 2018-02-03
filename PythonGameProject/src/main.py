@@ -22,6 +22,7 @@ class Game:
         # high score #czytanie i pisanie, jesli nie istnieje to stworzy plik
         self.dir = path.dirname(__file__)
         self.img_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/images/postac"
+        self.plat_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/images/paltformy"
         ## --------------
         # jeden obrazek dla gracza
         self.player_img_idle=[]

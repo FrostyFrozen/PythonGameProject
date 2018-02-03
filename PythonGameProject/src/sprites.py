@@ -57,6 +57,8 @@ class Player(pg.sprite.Sprite):
             self.walking = True
         else:
             self.walking = False
+        if self.vel.y < 0:
+            self.walking = False  
         # animacja biegu
         if self.walking:
             if now - self.last_update > 80:
@@ -76,6 +78,21 @@ class Player(pg.sprite.Sprite):
                 self.current_frame = (self.current_frame + 1) % len(self.game.player_img_idle)
                 bottom = self.rect.bottom
                 self.image = self.game.player_img_idle[self.current_frame]
+                self.rect = self.image.get_rect()
+                self.rect.bottom = bottom
+        # animacja skoku
+        if self.vel.y != 0:
+            self.jumping= True
+        else:
+            self.jumping = False
+            
+        if self.jumping:
+            if now - self.last_update > 80:
+                self.last_update = now
+                self.current_frame = (self.current_frame + 1) % len(self.game.player_img_jump)
+                bottom = self.rect.bottom
+                if self.vel.y < 0:
+                    self.image = self.game.player_img_jump[self.current_frame]
                 self.rect = self.image.get_rect()
                 self.rect.bottom = bottom
                 
