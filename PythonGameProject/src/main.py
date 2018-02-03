@@ -27,6 +27,7 @@ class Game:
         self.player_img_idle=[]
         self.player_img_jump=[]
         self.player_img_run=[]
+        self.player_img_runl=[]
         for i in range(10):
             img_idle=pg.image.load(path.join(self.img_dir,"Idle__00"+str(i)+".png")).convert_alpha()
             img_idle=pg.transform.scale(img_idle,PLAYER_BOXES)
@@ -35,10 +36,15 @@ class Game:
             img_jump=pg.image.load(path.join(self.img_dir,"Jump__00"+str(i)+".png")).convert_alpha()
             img_jump=pg.transform.scale(img_jump,PLAYER_BOXES)
             self.player_img_jump.append(img_jump)
-            
+            #w prawo
             img_run=pg.image.load(path.join(self.img_dir,"Run__00"+str(i)+".png")).convert_alpha()
             img_run=pg.transform.scale(img_run,PLAYER_BOXES)
             self.player_img_run.append(img_run)
+            # w lewo
+            img_runl=pg.image.load(path.join(self.img_dir,"Run__00"+str(i)+".png")).convert_alpha()
+            img_runl=pg.transform.scale(img_runl,PLAYER_BOXES)
+            img_runl=pg.transform.flip(img_runl, True, False)
+            self.player_img_runl.append(img_runl)
         ## --------------
         with open(path.join(self.dir, HS_FILE), 'w') as f:
              try:
