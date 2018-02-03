@@ -44,10 +44,10 @@ class Player(pg.sprite.Sprite):
             self.vel.x = 0
         self.pos += self.vel + 0.5 * self.acc
         # boki ekranu
-        if self.pos.x > WIDTH:
-            self.pos.x = 0
-        if self.pos.x < 0:
-            self.pos.x = WIDTH
+        if self.pos.x > WIDTH + self.rect.width /2:
+            self.pos.x = 0 - self.rect.width /2
+        if self.pos.x < 0 - self.rect.width /2:
+            self.pos.x = WIDTH + self.rect.width /2
 
         self.rect.midbottom = self.pos
         
@@ -59,7 +59,7 @@ class Player(pg.sprite.Sprite):
             self.walking = False
         # animacja biegu
         if self.walking:
-            if now - self.last_update > 180:
+            if now - self.last_update > 80:
                 self.last_update = now
                 self.current_frame = (self.current_frame + 1) % len(self.game.player_img_runl)
                 bottom = self.rect.bottom
@@ -71,7 +71,7 @@ class Player(pg.sprite.Sprite):
                 self.rect.bottom = bottom
         # animacja postac stojaca
         if not self.jumping and not self.walking:
-            if now - self.last_update > 350:
+            if now - self.last_update > 100:
                 self.last_update = now
                 self.current_frame = (self.current_frame + 1) % len(self.game.player_img_idle)
                 bottom = self.rect.bottom
