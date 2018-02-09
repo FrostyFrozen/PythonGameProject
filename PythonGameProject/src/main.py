@@ -95,9 +95,15 @@ class Game:
         # Sprawdza czy  gracz dotyka platformy kiedy tylko spada
        if self.player.vel.y > 0:
              hits = pg.sprite.spritecollide(self.player,self.platforms, False)
-             if hits:
-                 self.player.pos.y = hits[0].rect.top + 1
-                 self.player.vel.y = 0
+             if hits: 
+                 lowest = hits[0] #jesli są np 2 platformy nad sobą, snapuje do tej, która przeskoczylismy
+                 for hit in hits:
+                     if hit.rect.bottom > lowest.rect.bottom:
+                         lowest = hit
+                 if self.player.pos.y < lowest.rect.centery: #snapuje kiedy stopy sa powyzej platformy
+                     self.player.pos.y = lowest.rect.top + 1
+                     self.player.vel.y = 0
+                     self.player.jumping = False
         # Jesli gracz dociera na sama gore ekranu
        if self.player.rect.top <= HEIGHT /4:
            self.player.pos.y += max(abs(self.player.vel.y), 2)
@@ -136,6 +142,9 @@ class Game:
            if event.type == pg.KEYDOWN:
                if event.key == pg.K_SPACE:
                    self.player.jump()
+           if event.type == pg.KEYUP:
+               if event.key == pg.K_SPACE:
+                   self.player.jump_cut()          
         
     
     def draw(self):

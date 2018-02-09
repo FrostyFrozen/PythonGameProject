@@ -20,13 +20,19 @@ class Player(pg.sprite.Sprite):
         self.pos = vec(40, HEIGHT - 100)
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
+    def jump_cut(self):
+        if self.jumping:
+            if self.vel.y < -3:
+                self.vel.y = -3
+
     def jump(self):
         #skacze tylko jeli stoi na platformie
         self.rect.x += 2
         hits = pg.sprite.spritecollide(self, self.game.platforms, False)
         self.rect.x -= 2
-        if hits:
-             self.vel.y = -PLAYER_JUMP
+        if hits and not self.jumping:
+            self.jumping = True
+            self.vel.y = -PLAYER_JUMP
         
     def update(self):
         self.animate()
