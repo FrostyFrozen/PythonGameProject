@@ -1,6 +1,7 @@
 # Sprite classes dla gry
 import pygame as pg
 from opcje import *
+from random import choice
 vec = pg.math.Vector2
 
 class Player(pg.sprite.Sprite):
@@ -15,15 +16,15 @@ class Player(pg.sprite.Sprite):
         #self.image.fill(YELLOW)
         self.image=game.player_img_idle[0]
         self.rect = self.image.get_rect()
-        self.rect.center = (WIDTH / 2, HEIGHT / 2)
-        self.pos = vec(WIDTH / 2, HEIGHT / 2)
+        self.rect.center = (40, HEIGHT - 100)
+        self.pos = vec(40, HEIGHT - 100)
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
     def jump(self):
         #skacze tylko jeli stoi na platformie
-        self.rect.x += 1
+        self.rect.x += 2
         hits = pg.sprite.spritecollide(self, self.game.platforms, False)
-        self.rect.x -= 1
+        self.rect.x -= 2
         if hits:
              self.vel.y = -PLAYER_JUMP
         
@@ -99,10 +100,12 @@ class Player(pg.sprite.Sprite):
                 self.rect.bottom = bottom
                 
 class Platform(pg.sprite.Sprite):
-    def __init__(self, x, y, w, h, col):
+    def __init__(self, game, x, y):
         pg.sprite.Sprite.__init__(self)
-        self.image = pg.Surface((w, h))
-        self.image.fill(col)
+        self.game = game
+        images = (self.game.platform_img)
+        self.image = choice(images)
+        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y

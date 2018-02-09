@@ -22,7 +22,7 @@ class Game:
         # high score #czytanie i pisanie, jesli nie istnieje to stworzy plik
         self.dir = path.dirname(__file__)
         self.img_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/images/postac"
-        self.plat_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/images/paltformy"
+        self.plat_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/images/platformy"
         ## --------------
         # jeden obrazek dla gracza
         self.player_img_idle=[]
@@ -34,7 +34,7 @@ class Game:
             img_idle=pg.image.load(path.join(self.img_dir,"Idle__00"+str(i)+".png")).convert_alpha()
             img_idle=pg.transform.scale(img_idle,PLAYER_BOXES)
             self.player_img_idle.append(img_idle)
-            
+            # skok w prawo
             img_jump=pg.image.load(path.join(self.img_dir,"Jump__00"+str(i)+".png")).convert_alpha()
             img_jump=pg.transform.scale(img_jump,PLAYER_BOXES)
             self.player_img_jump.append(img_jump)
@@ -43,15 +43,22 @@ class Game:
             img_jumpl=pg.transform.scale(img_jumpl,PLAYER_BOXES)
             img_jumpl=pg.transform.flip(img_jumpl, True, False)
             self.player_img_jumpl.append(img_jumpl)
-            # w prawo
+            #bieg w prawo
             img_run=pg.image.load(path.join(self.img_dir,"Run__00"+str(i)+".png")).convert_alpha()
             img_run=pg.transform.scale(img_run,PLAYER_BOXES)
             self.player_img_run.append(img_run)
-            # w lewo
+            #bieg w lewo
             img_runl=pg.image.load(path.join(self.img_dir,"Run__00"+str(i)+".png")).convert_alpha()
             img_runl=pg.transform.scale(img_runl,PLAYER_BOXES)
             img_runl=pg.transform.flip(img_runl, True, False)
             self.player_img_runl.append(img_runl)
+            #platformy grafika
+        self.platform_img = []
+        for i in range(3):
+            plat_img=pg.image.load(path.join(self.plat_dir,"platforma"+str(i)+".png")).convert_alpha()
+            plat_img=pg.transform.scale(plat_img,PLATFORM_BOXES)
+            self.platform_img.append(plat_img)
+        
         ## --------------
         with open(path.join(self.dir, HS_FILE), 'w') as f:
              try:
@@ -68,7 +75,7 @@ class Game:
         self.player = Player(self)
         self.all_sprites.add(self.player)
         for plat in PLATFORM_LIST:
-            p = Platform(*plat)
+            p = Platform(self,*plat)
             self.all_sprites.add(p)
             self.platforms.add(p)
         self.run()
@@ -93,9 +100,9 @@ class Game:
                  self.player.vel.y = 0
         # Jesli gracz dociera na sama gore ekranu
        if self.player.rect.top <= HEIGHT /4:
-           self.player.pos.y += abs(self.player.vel.y)
+           self.player.pos.y += max(abs(self.player.vel.y), 2)
            for plat in self.platforms:
-               plat.rect.y += abs(self.player.vel.y)
+               plat.rect.y += max(abs(self.player.vel.y), 2)
                if plat.rect.top >= HEIGHT:
                    plat.kill()
                    self.score += 10
@@ -108,29 +115,15 @@ class Game:
        if len(self.platforms) == 0: 
            self.playing = False
            
-        # Spawnowanie nowych platform       
+        # Spawnowanie nowych platform   
        while len(self.platforms) < 6:
-           
             width = random.randrange(50, 100)
-            
-            col_randomizer=rnd.randint(0,2)
-            multiplier=1
-            if (col_randomizer==0):
-                col=YELLOW
-            elif (col_randomizer==1):
-                col=GREEN
-            else:
-                col=RED
-            if self.score > 400:
-                multiplier=0.9
-            if self.score > 700:
-                multiplier=0.8
-                
-            p = Platform(random.randrange(0, WIDTH-width),
-                         random.randrange(-75, -30),
-                         multiplier*width, 20,col)        
+            p = Platform(self, random.randrange(0, WIDTH - width),
+                         random.randrange(-75, -30))
             self.platforms.add(p)
             self.all_sprites.add(p)
+            
+#STARE
                    
     def events(self):
         # Game Loop - Events
@@ -149,6 +142,7 @@ class Game:
         # Game Loop - Draw
         self.screen.fill(BGCOLOR)
         self.all_sprites.draw(self.screen)
+        self.screen.blit(self.player.image, self.player.rect)
         self.draw_text(str(self.score), 22, WHITE, WIDTH / 2, 15)
         # *after* drawinf everything, flip the display
         pg.display.flip()
