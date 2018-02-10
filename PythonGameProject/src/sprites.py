@@ -20,17 +20,20 @@ class Player(pg.sprite.Sprite):
         self.pos = vec(40, HEIGHT - 100)
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
+        #Słaby skok
     def jump_cut(self):
         if self.jumping:
             if self.vel.y < -3:
                 self.vel.y = -3
 
     def jump(self):
-        #skacze tylko jeli stoi na platformie
+        #skacze tylko jeli stoi na platformie/normalny skok
         self.rect.x += 2
         hits = pg.sprite.spritecollide(self, self.game.platforms, False)
         self.rect.x -= 2
         if hits and not self.jumping:
+           # self.game.jump_sound.play()
+            choice(self.game.jump_sounds).play()
             self.jumping = True
             self.vel.y = -PLAYER_JUMP
         

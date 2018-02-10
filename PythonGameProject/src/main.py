@@ -1,5 +1,6 @@
 # Jumping Heavens - platform game
 
+
 import pygame as pg
 import random
 from opcje import *
@@ -23,7 +24,16 @@ class Game:
         self.dir = path.dirname(__file__)
         self.img_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/images/postac"
         self.plat_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/images/platformy"
-        ## --------------
+        # ładowanie dźwieków
+        self.sound_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/dzwiek"
+       # self.jump_sound = pg.mixer.Sound(path.join(self.sound_dir, "jumppp2.ogg"))
+        self.jump_sounds=[]
+        for i in range(2):
+            jump1=pg.mixer.Sound(path.join(self.sound_dir, "jumppp2.ogg"))
+            self.jump_sounds.append(jump1)
+            jump2=pg.mixer.Sound(path.join(self.sound_dir, "jumppp1.ogg"))
+            self.jump_sounds.append(jump2)
+        
         # jeden obrazek dla gracza
         self.player_img_idle=[]
         self.player_img_jump=[]
@@ -78,16 +88,19 @@ class Game:
             p = Platform(self,*plat)
             self.all_sprites.add(p)
             self.platforms.add(p)
+        pg.mixer.music.load(path.join(self.sound_dir, "old_cave.ogg"))
         self.run()
     
     def run(self):
         # Game Loop
+        pg.mixer.music.play(loops=-1)
         self.playing = True
         while  self.playing:
             self.clock.tick(FPS)
             self.events()
             self.update()
             self.draw()
+        pg.mixer.music.fadeout(500)
          
     def update(self):
         # Game Loop - Update
