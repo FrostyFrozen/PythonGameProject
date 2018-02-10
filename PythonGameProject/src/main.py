@@ -17,6 +17,7 @@ class Game:
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
         self.running = True
+        self.freeze_all_motor_functions=False
         self.font_name = pg.font.match_font(FONT_NAME)
         self.load_data()
     def load_data(self):
@@ -24,15 +25,15 @@ class Game:
         self.dir = path.dirname(__file__)
         self.img_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/images/postac"
         self.plat_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/images/platformy"
+        self.item_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/images/przedmioty"
         # ładowanie dźwieków
         self.sound_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/dzwiek"
        # self.jump_sound = pg.mixer.Sound(path.join(self.sound_dir, "jumppp2.ogg"))
         self.jump_sounds=[]
-        for i in range(2):
-            jump1=pg.mixer.Sound(path.join(self.sound_dir, "jumppp2.ogg"))
-            self.jump_sounds.append(jump1)
-            jump2=pg.mixer.Sound(path.join(self.sound_dir, "jumppp1.ogg"))
-            self.jump_sounds.append(jump2)
+        jump1=pg.mixer.Sound(path.join(self.sound_dir, "jumppp2.ogg"))
+        self.jump_sounds.append(jump1)
+        jump2=pg.mixer.Sound(path.join(self.sound_dir, "jumppp1.ogg"))
+        self.jump_sounds.append(jump2)
         
         # jeden obrazek dla gracza
         self.player_img_idle=[]
@@ -68,6 +69,13 @@ class Game:
             plat_img=pg.image.load(path.join(self.plat_dir,"platforma"+str(i)+".png")).convert_alpha()
             plat_img=pg.transform.scale(plat_img,PLATFORM_BOXES)
             self.platform_img.append(plat_img)
+            
+            #POWER UP
+        self.powerup_img=[]
+        for i in range(1):
+            power_img = pg.image.load(path.join(self.item_dir,"boxItem"+".png")).convert_alpha()
+            power_img = pg.transform.scale(power_img,ITEM_BOXES)
+            self.powerup_img.append(power_img)
         
         ## --------------
         with open(path.join(self.dir, HS_FILE), 'w') as f:
@@ -82,12 +90,10 @@ class Game:
         self.score = 0
         self.all_sprites = pg.sprite.Group()
         self.platforms = pg.sprite.Group()
+        self.powerups = pg.sprite.Group()
         self.player = Player(self)
-        self.all_sprites.add(self.player)
         for plat in PLATFORM_LIST:
-            p = Platform(self,*plat)
-            self.all_sprites.add(p)
-            self.platforms.add(p)
+            Platform(self,*plat)
         pg.mixer.music.load(path.join(self.sound_dir, "old_cave.ogg"))
         self.run()
     
@@ -100,7 +106,7 @@ class Game:
             self.events()
             self.update()
             self.draw()
-        pg.mixer.music.fadeout(500)
+        pg.mixer.music.fadeout(800)
          
     def update(self):
         # Game Loop - Update
@@ -113,10 +119,13 @@ class Game:
                  for hit in hits:
                      if hit.rect.bottom > lowest.rect.bottom:
                          lowest = hit
-                 if self.player.pos.y < lowest.rect.centery: #snapuje kiedy stopy sa powyzej platformy
-                     self.player.pos.y = lowest.rect.top + 1
-                     self.player.vel.y = 0
-                     self.player.jumping = False
+                 if self.player.pos.x - 12 < lowest.rect.right and \
+                     self.player.pos.x + 12 > lowest.rect.left:
+                         if self.player.pos.y < lowest.rect.centery: #snapuje kiedy stopy sa powyzej platformy
+                             self.player.pos.y = lowest.rect.top + 1
+                             self.player.vel.y = 0
+                             self.player.jumping = False
+                     
         # Jesli gracz dociera na sama gore ekranu
        if self.player.rect.top <= HEIGHT /4:
            self.player.pos.y += max(abs(self.player.vel.y), 2)
@@ -125,6 +134,47 @@ class Game:
                if plat.rect.top >= HEIGHT:
                    plat.kill()
                    self.score += 10
+        # kiedy gracz doknie 
+       pow_hits = pg.sprite.spritecollide(self.player,self.powerups, True)
+       for pow in pow_hits:
+            if pow.type == "boost":
+                self.player.vel.y = -BOOST_POWER
+                self.player.jumping = False
+                self.freeze_all_motor_functions = True
+                self.player.boost_pu=True
+                now = pg.time.get_ticks()
+                self.boost_update = now
+            if pow.type == "reverser":
+                self.player.reverse_pu=True
+                now = pg.time.get_ticks()
+                self.reverser_update = now
+            if pow.type == "jumper":
+                self.player.jumper_pu=True
+                now = pg.time.get_ticks()
+                self.jumper_update = now
+                self.player.jumper_bonus=10
+                
+                
+       if self.player.boost_pu==True:
+            now = pg.time.get_ticks()
+            if now - self.boost_update > 1200:
+                self.freeze_all_motor_functions = False
+                self.player.boost_pu=False
+                
+       if self.player.reverse_pu==True:
+            now = pg.time.get_ticks()
+            if now - self.reverser_update > 4000:
+                self.player.reverse_pu=False
+                
+       if self.player.jumper_pu==True:
+            now = pg.time.get_ticks()
+            if now - self.jumper_update > 4000:
+                self.player.jumper_pu=False
+                self.player.jumper_bonus=0
+                    
+        
+                
+                
         # Smierc gracza
        if self.player.rect.bottom > HEIGHT:
            for sprite in self.all_sprites:
@@ -137,10 +187,9 @@ class Game:
         # Spawnowanie nowych platform   
        while len(self.platforms) < 6:
             width = random.randrange(50, 100)
-            p = Platform(self, random.randrange(0, WIDTH - width),
+            Platform(self, random.randrange(0, WIDTH - width),
                          random.randrange(-75, -30))
-            self.platforms.add(p)
-            self.all_sprites.add(p)
+            
             
 #STARE
                    
@@ -152,10 +201,10 @@ class Game:
                if self.playing:
                    self.playing = False
                self.running = False
-           if event.type == pg.KEYDOWN:
+           if event.type == pg.KEYDOWN and self.freeze_all_motor_functions==False:
                if event.key == pg.K_SPACE:
                    self.player.jump()
-           if event.type == pg.KEYUP:
+           if event.type == pg.KEYUP and self.freeze_all_motor_functions==False:
                if event.key == pg.K_SPACE:
                    self.player.jump_cut()          
         

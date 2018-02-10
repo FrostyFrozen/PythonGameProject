@@ -13,6 +13,11 @@ PLAYER_GRAV = 0.8
 PLAYER_JUMP = 22
 PLAYER_BOXES=(50,70)
 PLATFORM_BOXES=(100,50)
+ITEM_BOXES=(15,15)
+
+# Ustawienia powerupów
+BOOST_POWER = 60
+POW_SPAWN_PCT = 20
 # - definiowanie kolorów
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)

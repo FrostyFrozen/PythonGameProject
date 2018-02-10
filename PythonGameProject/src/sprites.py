@@ -1,15 +1,20 @@
 # Sprite classes dla gry
 import pygame as pg
 from opcje import *
-from random import choice
+from random import choice, randrange
 vec = pg.math.Vector2
 
 class Player(pg.sprite.Sprite):
     def __init__(self, game):
-        pg.sprite.Sprite.__init__(self)
+        self.groups = game.all_sprites
+        pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.walking = False
         self.jumping = False
+        self.boost_pu = False
+        self.reverse_pu = False
+        self.jumper_pu=False
+        self.jumper_bonus=0
         self.current_frame = 0
         self.last_update = 0
         #self.image = pg.Surface((30, 40))
@@ -35,16 +40,22 @@ class Player(pg.sprite.Sprite):
            # self.game.jump_sound.play()
             choice(self.game.jump_sounds).play()
             self.jumping = True
-            self.vel.y = -PLAYER_JUMP
+            self.vel.y = -PLAYER_JUMP - self.jumper_bonus
         
     def update(self):
         self.animate()
         self.acc = vec(0,PLAYER_GRAV)
         keys = pg.key.get_pressed()
-        if keys[pg.K_LEFT]:
-            self.acc.x = -PLAYER_ACC
-        if keys[pg.K_RIGHT]:
-            self.acc.x = PLAYER_ACC
+        if self.reverse_pu==False:
+            if keys[pg.K_LEFT]:
+                self.acc.x = -PLAYER_ACC
+            if keys[pg.K_RIGHT]:
+                self.acc.x = PLAYER_ACC
+        else:
+            if keys[pg.K_RIGHT]:
+                self.acc.x = -PLAYER_ACC
+            if keys[pg.K_LEFT]:
+                self.acc.x = PLAYER_ACC
                 
         # definiowanie tarcia
         self.acc.x += self.vel.x * PLAYER_FRICTION
@@ -110,7 +121,8 @@ class Player(pg.sprite.Sprite):
                 
 class Platform(pg.sprite.Sprite):
     def __init__(self, game, x, y):
-        pg.sprite.Sprite.__init__(self)
+        self.groups = game.all_sprites, game.platforms
+        pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         images = (self.game.platform_img)
         self.image = choice(images)
@@ -118,3 +130,24 @@ class Platform(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        if randrange(100) < POW_SPAWN_PCT:
+            Powerup(self.game, self)
+        
+class Powerup(pg.sprite.Sprite):
+    def __init__(self, game, plat):
+        self.groups = game.all_sprites, game.powerups
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.plat = plat
+        self.type = choice(["jumper","boost","reverser"])
+        images = (self.game.powerup_img)
+        self.image = choice(images)
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.centerx = self.plat.rect.centerx
+        self.rect.bottom = self.plat.rect.top - 5
+    def update(self):
+        self.rect.bottom = self.plat.rect.top - 5
+        if not self.game.platforms.has(self.plat):
+            self.kill()
+        
