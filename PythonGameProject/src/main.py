@@ -183,6 +183,8 @@ class Game:
                 self.player.boost_pu=True
                 now = pg.time.get_ticks()
                 self.boost_update = now
+
+                    
             if pow.type == "reverser":
                 self.reverser_sound.play()
                 self.player.reverse_pu=True
