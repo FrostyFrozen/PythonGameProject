@@ -6,6 +6,7 @@ vec = pg.math.Vector2
 
 class Player(pg.sprite.Sprite):
     def __init__(self, game):
+        self._layer = PLAYER_LAYER
         self.groups = game.all_sprites
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
@@ -121,6 +122,7 @@ class Player(pg.sprite.Sprite):
                 
 class Platform(pg.sprite.Sprite):
     def __init__(self, game, x, y):
+        self._layer = PLATFORM_LAYER
         self.groups = game.all_sprites, game.platforms
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
@@ -135,6 +137,7 @@ class Platform(pg.sprite.Sprite):
         
 class Powerup(pg.sprite.Sprite):
     def __init__(self, game, plat):
+        self._layer = POWERUP_LAYER
         self.groups = game.all_sprites, game.powerups
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
@@ -150,4 +153,47 @@ class Powerup(pg.sprite.Sprite):
         self.rect.bottom = self.plat.rect.top - 5
         if not self.game.platforms.has(self.plat):
             self.kill()
-        
+class Mob(pg.sprite.Sprite):
+    def __init__(self, game):
+        self._layer = MOB_LAYER
+        self.groups = game.all_sprites, game.mobs
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image_up = self.game.mob_img1p
+        self.image_up.set_colorkey(BLACK)
+        self.image_upp = self.game.mob_img1
+        self.image_down = self.game.mob_img2p
+        self.image_down.set_colorkey(BLACK)
+        self.image_downp = self.game.mob_img2
+        self.image = self.image_up
+        self.rect = self.image.get_rect()
+        self.rect.centerx = choice([-100, WIDTH + 100])
+        self.vx = randrange(1, 4)
+        if self.rect.centerx > WIDTH:
+            self.vx *= -1
+        self.rect.y = randrange(HEIGHT / 2)
+        self.vy = 0
+        self.dy = 0.5
+
+    def update(self):
+        self.rect.x += self.vx
+        self.vy += self.dy
+        if self.vy > 3 or self.vy < -3:
+            self.dy *= -1
+        center = self.rect.center
+        if self.vx > 0:
+            if self.dy < 0:
+                self.image = self.image_up
+            else:
+                self.image = self.image_down
+        if self.vx < 0:
+            if self.dy < 0:
+                self.image = self.image_upp
+            else:
+                self.image = self.image_downp
+         
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.rect.y += self.vy
+        if self.rect.left > WIDTH + 100 or self.rect.right < -100:
+            self.kill()

@@ -21,11 +21,10 @@ class Game:
         self.font_name = pg.font.match_font(FONT_NAME)
         self.load_data()
     def load_data(self):
-        # high score #czytanie i pisanie, jesli nie istnieje to stworzy plik
-        self.dir = path.dirname(__file__)
         self.img_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/images/postac"
         self.plat_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/images/platformy"
         self.item_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/images/przedmioty"
+        self.mob_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/images/mob"
         # ładowanie dźwieków
         self.sound_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/dzwiek"
        # self.jump_sound = pg.mixer.Sound(path.join(self.sound_dir, "jumppp2.ogg"))
@@ -34,6 +33,9 @@ class Game:
         self.jump_sounds.append(jump1)
         jump2=pg.mixer.Sound(path.join(self.sound_dir, "jumppp1.ogg"))
         self.jump_sounds.append(jump2)
+        self.boost_sound=pg.mixer.Sound(path.join(self.sound_dir, "boost.wav"))
+        self.jumper_sound=pg.mixer.Sound(path.join(self.sound_dir, "jumper.wav"))
+        self.reverser_sound=pg.mixer.Sound(path.join(self.sound_dir, "reverser.wav"))
         
         # jeden obrazek dla gracza
         self.player_img_idle=[]
@@ -62,7 +64,7 @@ class Game:
             img_runl=pg.image.load(path.join(self.img_dir,"Run__00"+str(i)+".png")).convert_alpha()
             img_runl=pg.transform.scale(img_runl,PLAYER_BOXES)
             img_runl=pg.transform.flip(img_runl, True, False)
-            self.player_img_runl.append(img_runl)
+            self.player_img_runl.append(img_runl) 
             #platformy grafika
         self.platform_img = []
         for i in range(3):
@@ -72,12 +74,24 @@ class Game:
             
             #POWER UP
         self.powerup_img=[]
-        for i in range(1):
-            power_img = pg.image.load(path.join(self.item_dir,"boxItem"+".png")).convert_alpha()
-            power_img = pg.transform.scale(power_img,ITEM_BOXES)
-            self.powerup_img.append(power_img)
+        power_img = pg.image.load(path.join(self.item_dir,"boxItem"+".png")).convert_alpha()
+        power_img = pg.transform.scale(power_img,ITEM_BOXES)
+        self.powerup_img.append(power_img)
+            #MOB
+        self.mob_img1 = pg.image.load(path.join(self.mob_dir,BAT_IMG)).convert_alpha()
+        self.mob_img1 = pg.transform.scale(self.mob_img1,MOB_BOXES)
+        self.mob_img2 = pg.image.load(path.join(self.mob_dir,BAT_FLY_IMG)).convert_alpha()
+        self.mob_img2 = pg.transform.scale(self.mob_img2,MOB_BOXES)
         
-        ## --------------
+        self.mob_img1p = pg.image.load(path.join(self.mob_dir,BAT_IMG)).convert_alpha()
+        self.mob_img1p = pg.transform.scale(self.mob_img1p,MOB_BOXES)
+        self.mob_img1p = pg.transform.flip(self.mob_img1p, True, False)
+        self.mob_img2p = pg.image.load(path.join(self.mob_dir,BAT_FLY_IMG)).convert_alpha()
+        self.mob_img2p = pg.transform.scale(self.mob_img2p,MOB_BOXES)
+        self.mob_img2p = pg.transform.flip(self.mob_img2p, True, False)
+        
+        # high score, jesli nie istnieje to stworzy plik
+        self.dir = path.dirname(__file__)
         with open(path.join(self.dir, HS_FILE), 'w') as f:
              try:
                  self.highscore = int(f.read())
@@ -88,13 +102,16 @@ class Game:
         # Nowa Gra
         rnd.seed(1)
         self.score = 0
-        self.all_sprites = pg.sprite.Group()
+        self.all_sprites = pg.sprite.LayeredUpdates()
         self.platforms = pg.sprite.Group()
         self.powerups = pg.sprite.Group()
+        self.mobs = pg.sprite.Group()
         self.player = Player(self)
         for plat in PLATFORM_LIST:
             Platform(self,*plat)
+        self.mob_timer = 0
         pg.mixer.music.load(path.join(self.sound_dir, "old_cave.ogg"))
+        pg.mixer.music.play(loops=-1)
         self.run()
     
     def run(self):
@@ -111,7 +128,18 @@ class Game:
     def update(self):
         # Game Loop - Update
        self.all_sprites.update()
-        # Sprawdza czy  gracz dotyka platformy kiedy tylko spada
+       # spawnowanie mobów
+       now = pg.time.get_ticks()
+       if now - self.mob_timer > 5000 + choice([-1000, -500, 0, 500, 1000]):
+           self.mob_timer = now
+           Mob(self)
+       # kiedy dotyka moba
+       mob_hits = pg.sprite.spritecollide(self.player, self.mobs, False)
+       if mob_hits:
+           self.playing = False
+       
+           
+       # Sprawdza czy  gracz dotyka platformy kiedy tylko spada
        if self.player.vel.y > 0:
              hits = pg.sprite.spritecollide(self.player,self.platforms, False)
              if hits: 
@@ -129,15 +157,18 @@ class Game:
         # Jesli gracz dociera na sama gore ekranu
        if self.player.rect.top <= HEIGHT /4:
            self.player.pos.y += max(abs(self.player.vel.y), 2)
+           for mob in self.mobs:
+               mob.rect.y += max(abs(self.player.vel.y), 2)
            for plat in self.platforms:
                plat.rect.y += max(abs(self.player.vel.y), 2)
                if plat.rect.top >= HEIGHT:
                    plat.kill()
                    self.score += 10
-        # kiedy gracz doknie 
+        # kiedy gracz doknie powerupa
        pow_hits = pg.sprite.spritecollide(self.player,self.powerups, True)
        for pow in pow_hits:
             if pow.type == "boost":
+                self.boost_sound.play()
                 self.player.vel.y = -BOOST_POWER
                 self.player.jumping = False
                 self.freeze_all_motor_functions = True
@@ -145,10 +176,12 @@ class Game:
                 now = pg.time.get_ticks()
                 self.boost_update = now
             if pow.type == "reverser":
+                self.reverser_sound.play()
                 self.player.reverse_pu=True
                 now = pg.time.get_ticks()
                 self.reverser_update = now
             if pow.type == "jumper":
+                self.jumper_sound.play()
                 self.player.jumper_pu=True
                 now = pg.time.get_ticks()
                 self.jumper_update = now
@@ -190,8 +223,6 @@ class Game:
             Platform(self, random.randrange(0, WIDTH - width),
                          random.randrange(-75, -30))
             
-            
-#STARE
                    
     def events(self):
         # Game Loop - Events
@@ -213,13 +244,14 @@ class Game:
         # Game Loop - Draw
         self.screen.fill(BGCOLOR)
         self.all_sprites.draw(self.screen)
-        self.screen.blit(self.player.image, self.player.rect)
         self.draw_text(str(self.score), 22, WHITE, WIDTH / 2, 15)
         # *after* drawinf everything, flip the display
         pg.display.flip()
     
     def show_start_screen(self):
         # game splash/ekran startowy
+        pg.mixer.music.load(path.join(self.sound_dir, "Space_Sprinkles.ogg"))
+        pg.mixer.music.play(loops=-1)
         self.screen.fill(BGCOLOR)
         self.draw_text(TITLE, 48, WHITE, WIDTH / 2, HEIGHT /4)
         self.draw_text("Użyj strzałek do poruszania się,a spacji do skakania", 22,
@@ -229,11 +261,14 @@ class Game:
         self.draw_text("High Score:" + str(self.highscore), 22, WHITE, WIDTH /2, 15)
         pg.display.flip()
         self.wait_for_key()
+        pg.mixer.music.fadeout(1000)
         
     def show_go_screen(self):
         #game over/ kontynuacja
         if not self.running:
             return
+        pg.mixer.music.load(path.join(self.sound_dir, "Lurid_Delusion.ogg"))
+        pg.mixer.music.play(loops=-1)
         self.screen.fill(BGCOLOR)
         self.draw_text("Koniec Gry", 48, WHITE, WIDTH / 2, HEIGHT /4)
         self.draw_text("Score:" + str(self.score), 22,
@@ -249,6 +284,7 @@ class Game:
             self.draw_text("High Score:" + str(self.highscore), 22, WHITE, WIDTH /2, HEIGHT / 2 + 40)
         pg.display.flip()
         self.wait_for_key()
+        pg.mixer.music.fadeout(900)
     
     def wait_for_key(self):
         waiting = True
