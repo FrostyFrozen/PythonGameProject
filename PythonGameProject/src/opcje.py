@@ -1,5 +1,5 @@
 # - opcje gry/ ustawienia
-TITLE = "PythonGameProject"
+TITLE = "Cave Jumper"
 WIDTH = 480
 HEIGHT = 600
 FPS = 60
@@ -38,6 +38,7 @@ BLUE =  (0, 0 , 255)
 YELLOW =(255, 255, 0)
 LIGHTBLUE =(0, 155, 155)
 BGCOLOR = BLACK
+BG_SIZE =(WIDTH, HEIGHT)
 
 # Platformy startowe
 PLATFORM_LIST = [(0, HEIGHT - 40),

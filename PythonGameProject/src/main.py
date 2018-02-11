@@ -25,6 +25,7 @@ class Game:
         self.plat_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/images/platformy"
         self.item_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/images/przedmioty"
         self.mob_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/images/mob"
+        self.background_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/images/tlo"
         # ładowanie dźwieków
         self.sound_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/dzwiek"
        # self.jump_sound = pg.mixer.Sound(path.join(self.sound_dir, "jumppp2.ogg"))
@@ -36,6 +37,7 @@ class Game:
         self.boost_sound=pg.mixer.Sound(path.join(self.sound_dir, "boost.wav"))
         self.jumper_sound=pg.mixer.Sound(path.join(self.sound_dir, "jumper.wav"))
         self.reverser_sound=pg.mixer.Sound(path.join(self.sound_dir, "reverser.wav"))
+        self.death_sound= pg.mixer.Sound(path.join(self.sound_dir, "dead.ogg"))
         
         # jeden obrazek dla gracza
         self.player_img_idle=[]
@@ -89,6 +91,12 @@ class Game:
         self.mob_img2p = pg.image.load(path.join(self.mob_dir,BAT_FLY_IMG)).convert_alpha()
         self.mob_img2p = pg.transform.scale(self.mob_img2p,MOB_BOXES)
         self.mob_img2p = pg.transform.flip(self.mob_img2p, True, False)
+            #TŁO
+        self.background_img = pg.image.load(path.join(self.background_dir,"cave2"+".png")).convert_alpha()
+        self.background_img = pg.transform.scale(self.background_img,BG_SIZE)
+        self.background_img_dark = pg.image.load(path.join(self.background_dir,"cave_dark"+".png")).convert_alpha()
+        self.background_img_dark = pg.transform.scale(self.background_img_dark,BG_SIZE)
+
         
         # high score, jesli nie istnieje to stworzy plik
         self.dir = path.dirname(__file__)
@@ -134,10 +142,10 @@ class Game:
            self.mob_timer = now
            Mob(self)
        # kiedy dotyka moba
-       mob_hits = pg.sprite.spritecollide(self.player, self.mobs, False)
+       mob_hits = pg.sprite.spritecollide(self.player, self.mobs, False, pg.sprite.collide_mask)
        if mob_hits:
            self.playing = False
-       
+           self.death_sound.play()
            
        # Sprawdza czy  gracz dotyka platformy kiedy tylko spada
        if self.player.vel.y > 0:
@@ -216,6 +224,7 @@ class Game:
                    sprite.kill()
        if len(self.platforms) == 0: 
            self.playing = False
+           self.death_sound.play()
            
         # Spawnowanie nowych platform   
        while len(self.platforms) < 6:
@@ -242,7 +251,7 @@ class Game:
     
     def draw(self):
         # Game Loop - Draw
-        self.screen.fill(BGCOLOR)
+        self.screen.blit(self.background_img, [0,0])
         self.all_sprites.draw(self.screen)
         self.draw_text(str(self.score), 22, WHITE, WIDTH / 2, 15)
         # *after* drawinf everything, flip the display
@@ -252,13 +261,13 @@ class Game:
         # game splash/ekran startowy
         pg.mixer.music.load(path.join(self.sound_dir, "Space_Sprinkles.ogg"))
         pg.mixer.music.play(loops=-1)
-        self.screen.fill(BGCOLOR)
+        self.screen.blit(self.background_img_dark, [0,0])
         self.draw_text(TITLE, 48, WHITE, WIDTH / 2, HEIGHT /4)
         self.draw_text("Użyj strzałek do poruszania się,a spacji do skakania", 22,
                        WHITE, WIDTH /2, HEIGHT /2)
-        self.draw_text("Wcisnij dowolny klawisz, aby zaczac gre", 22, WHITE,
+        self.draw_text("Wciśnij dowolny klawisz, aby zacząć grę", 22, WHITE,
                        WIDTH / 2, HEIGHT * 3 / 4)
-        self.draw_text("High Score:" + str(self.highscore), 22, WHITE, WIDTH /2, 15)
+        self.draw_text("Najlepszy wynik:" + str(self.highscore), 22, WHITE, WIDTH /2, 15)
         pg.display.flip()
         self.wait_for_key()
         pg.mixer.music.fadeout(1000)
@@ -269,7 +278,7 @@ class Game:
             return
         pg.mixer.music.load(path.join(self.sound_dir, "Lurid_Delusion.ogg"))
         pg.mixer.music.play(loops=-1)
-        self.screen.fill(BGCOLOR)
+        self.screen.blit(self.background_img, [0,0])
         self.draw_text("Koniec Gry", 48, WHITE, WIDTH / 2, HEIGHT /4)
         self.draw_text("Score:" + str(self.score), 22,
                        WHITE, WIDTH /2, HEIGHT /2)
