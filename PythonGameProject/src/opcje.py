@@ -28,7 +28,7 @@ MOB_LAYER = 2
 
 # Ustawienia powerupów
 BOOST_POWER = 60
-POW_SPAWN_PCT = 20
+POW_SPAWN_PCT = 7
 # - definiowanie kolorów
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
