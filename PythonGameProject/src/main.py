@@ -28,7 +28,7 @@ class Game:
         self.background_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/images/tlo"
         # ładowanie dźwieków
         self.sound_dir="C:/Users/czajk/Desktop/Programowanie/PythonGameProject/PythonGameProject/dzwiek"
-       # self.jump_sound = pg.mixer.Sound(path.join(self.sound_dir, "jumppp2.ogg"))
+        # Wczytywanie dzwieków
         self.jump_sounds=[]
         jump1=pg.mixer.Sound(path.join(self.sound_dir, "jumppp2.ogg"))
         self.jump_sounds.append(jump1)
@@ -319,6 +319,8 @@ class Game:
 g = Game()
 g.show_start_screen()
 while g.running:
+    # Startujemy gre
     g.new()
+    # Koniec gry
     g.show_go_screen()
 pg.quit()
